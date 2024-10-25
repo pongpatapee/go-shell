@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/user"
 	"strings"
 )
 
@@ -43,8 +44,28 @@ func main() {
 	// read in user input
 	reader := bufio.NewReader(os.Stdin)
 
+	hostname, err := os.Hostname()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Could not get machine's host name")
+		os.Exit(1)
+	}
+
+	currUser, err := user.Current()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Could not get current user")
+		os.Exit(1)
+	}
+
 	for {
-		fmt.Print("> ")
+
+		cwd, err := os.Getwd()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Could not get working directory")
+			os.Exit(1)
+		}
+
+		// bash like prompt
+		fmt.Printf("%v@%v:%v> \n", currUser.Username, hostname, cwd)
 		input, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
